@@ -7,6 +7,8 @@
 
 #include <GLUT/glut.h>
 
+#pragma once
+
 /* globals */
 
 GLsizei wh = 600, ww = 500; /* initial window size */
@@ -52,16 +54,6 @@ void myMouse(int btn, int state, int x, int y)
 	if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 		exit(0); /*terminate the program through OpenGL */
 }
-
-/* display callback required by GLUT 3.0 */
-
-
-/*
-         glBegin(GL_POLYGON);
-            glVertex2f(j, j+10);
-            glVertex2f(j, j+20);
-         glEnd();
-*/
 
 void myDisplay(void)
 {   
@@ -110,15 +102,15 @@ void myDisplay(void)
       glVertex2f(0.0f, 520.f);
    glEnd();
 
+   // Top lane
    glBegin(GL_POLYGON);
       glVertex2f(0.0f, 580.0f);
       glVertex2f(500.f, 580.0f);
       glVertex2f(500.f, 600.f);
       glVertex2f(0.0f, 600.f);
    glEnd();
-
-   //drawStripLine();
   
+   // Draws the road lane one by one
    glColor3f(1.0f, 1.0f, 1.0f);
    for(int y = 40; y < 600; y += 20) {
       for(int x = 0; x < 500; x += 20) {
@@ -133,8 +125,7 @@ void myDisplay(void)
 }
 
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
