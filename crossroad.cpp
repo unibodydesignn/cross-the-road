@@ -4,16 +4,24 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <queue> 
 #include <GLUT/glut.h>
 
-#pragma once
+#include "truck.h"
+#include "car.h"
+#include "user.h"
 
+#pragma once
+using namespace std;
 /* globals */
 
 GLsizei wh = 600, ww = 500; /* initial window size */
 GLfloat size = 3.0;   /* half side length of square */
+vector<Truck> trucks;
+vector<Car> cars;
+User user();
 
+float deltaVelocity = 10.2;
 
 /* rehaping routine called whenever window is resized
 or moved */
@@ -53,6 +61,13 @@ void myMouse(int btn, int state, int x, int y)
 {
 	if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 		exit(0); /*terminate the program through OpenGL */
+}
+
+void createPassingVehicles(int time) {
+
+
+   glutPostRedisplay();
+
 }
 
 void myDisplay(void)
@@ -132,12 +147,12 @@ int main(int argc, char** argv) {
 	glutInitWindowSize(ww, wh);
 	glutCreateWindow("CrossLane");
 	myinit();
-	//glutReshapeFunc(myReshape);
+	glutReshapeFunc(myReshape);
 	glutMouseFunc(myMouse);
 	//glutMotionFunc(makeSquare);
 	glutDisplayFunc(myDisplay);
 	glutKeyboardFunc(myKeyboard);
-
-	srand(time(NULL));
+   glutTimerFunc(200, createPassingVehicles, 0);
+	//srand(time(NULL));
 	glutMainLoop();
 }

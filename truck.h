@@ -41,4 +41,16 @@ public:
     void setDirection(bool d) {
         direction = d;
     }
+
+    void setX(float x) {
+        xCo = x;
+    }
+
+    float getX() {
+        return xCo;
+    }
+
+    float getVelocity() {
+        return v;
+    }
 };
