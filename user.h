@@ -18,7 +18,7 @@ public:
         yCo = 0;
     }
 
-    void setCoordinate(float x, float y) {
+    void setXY(float x, float y) {
         xCo = x;
         yCo = y;
     }

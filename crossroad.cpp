@@ -136,6 +136,15 @@ void myDisplay(void)
       }
    }
 
+   //User location 
+   glColor3f(0.123f, 0.12, 1.0f);
+   User user;
+   glBegin(GL_TRIANGLES);
+      glVertex2f(user.getX() -15, user.getY());
+      glVertex2f(user.getX() +15, user.getY());
+      glVertex2f(user.getX(), user.getY() + 20);
+   glEnd();
+
    glFlush();
 }
 
