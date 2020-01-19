@@ -4,25 +4,80 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <queue> 
+#include <iostream>
+#include <vector> 
 #include <GLUT/glut.h>
 
-#include "truck.h"
-#include "car.h"
-#include "user.h"
+//#include "truck.h"
+//#include "car.h"
+//#include "user.h"
 
 #pragma once
 using namespace std;
-/* globals */
+
+struct User {
+
+   bool direction;
+   float xCo;
+   float yCo;
+
+   User() {
+      xCo = 250;
+      yCo = 0;
+      direction = true;
+      printf("User has been constructed;\n");
+   }
+
+   ~User() {
+      xCo = 250;
+      yCo = 0;
+   }
+
+   void setXY(float x, float y) {
+      xCo = x;
+      yCo = y;
+   }
+
+   void setX(float x) {
+      xCo = x;
+   }
+
+   void setY(float y) {
+      yCo = y;
+   }
+
+   float getX() {
+      return xCo;
+   }
+
+   float getY() {
+      return yCo;
+   }
+
+   bool getDirection() {
+      return direction;
+   }
+
+   void setDirection(bool d) {
+      direction = d;
+   }
+};
+
+struct Truck {
+
+};
+
+struct Car {
+
+};
+
 
 GLsizei wh = 600, ww = 500; /* initial window size */
 GLfloat size = 3.0;   /* half side length of square */
 vector<Truck> trucks;
 vector<Car> cars;
-User user();
-
 float deltaVelocity = 10.2;
-
+User *user;
 /* rehaping routine called whenever window is resized
 or moved */
 
@@ -51,10 +106,54 @@ void myinit(void)
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 }
 
-void myKeyboard(unsigned char key, int x, int y)
-{
-	if ((key == 'Q') || (key == 'q'))
-		exit(0);
+void moveUser(int key, int x, int y) {
+   switch (key) {
+      case GLUT_KEY_UP:
+         glutPostRedisplay();
+         if (user->getY() >= 580) {
+            user->setY(600);
+         } else {
+            user->setY(user->getY() + 20);
+         }
+         user->setDirection(true);
+         printf("UP User location %f %f \n", user->getX(), user->getY());
+         break;
+      case GLUT_KEY_DOWN:
+         glutPostRedisplay();
+         if (user->getY() <= 20) {
+            user->setY(0);
+         } else {
+            user->setY(user->getY() - 20);
+         }
+         user->setDirection(false);
+         printf("DOWN User location %f %f \n", user->getX(), user->getY());
+         break;
+      case GLUT_KEY_LEFT:
+      glutPostRedisplay();
+         if (user->getX() <= 10) {
+            user->setX(0);
+         } else {
+            user->setX(user->getX() - 10);
+         }
+         
+         printf("LEFT User location %f %f \n", user->getX(), user->getY());
+         break;
+      case GLUT_KEY_RIGHT:
+      glutPostRedisplay();
+         printf("Tusa basildi");
+         if (user->getX() >= 490) {
+            user->setX(500);
+         } else {
+            user->setX(user->getX() + 10);
+         }
+         
+         printf("RIGHT User location %f %f \n", user->getX(), user->getY());
+         break;
+      default:
+         exit(0);
+   }
+   //glutPostRedisplay();
+   //glFlush();
 }
 
 void myMouse(int btn, int state, int x, int y)
@@ -63,16 +162,27 @@ void myMouse(int btn, int state, int x, int y)
 		exit(0); /*terminate the program through OpenGL */
 }
 
-void createPassingVehicles(int time) {
+void transpassingVehicle() {
+   
+}
 
-
-   glutPostRedisplay();
-
+void keyInput(unsigned char key, int x, int y)
+{
+   switch (key) 
+   {
+      case 27:
+         exit(0);
+         break;
+      default:
+         break;
+   }
 }
 
 void myDisplay(void)
 {   
-   glColor3f(1.0, 1.0, 1.0f);
+   glClear(GL_COLOR_BUFFER_BIT);
+   //glLoadIdentity();
+   glColor3f(0.0, 0.0, 0.0f);
 
    //Bottom lane
    glBegin(GL_POLYGON);
@@ -126,7 +236,7 @@ void myDisplay(void)
    glEnd();
   
    // Draws the road lane one by one
-   glColor3f(1.0f, 1.0f, 1.0f);
+   glColor3f(0.0f, 0.0f, 0.0f);
    for(int y = 40; y < 600; y += 20) {
       for(int x = 0; x < 500; x += 20) {
          glBegin(GL_LINES);
@@ -138,30 +248,43 @@ void myDisplay(void)
 
    //User location 
    glColor3f(0.123f, 0.12, 1.0f);
-   User user;
-   glBegin(GL_TRIANGLES);
-      glVertex2f(user.getX() -15, user.getY());
-      glVertex2f(user.getX() +15, user.getY());
-      glVertex2f(user.getX(), user.getY() + 20);
-   glEnd();
+   if (user->getDirection() == true) {
+      glBegin(GL_TRIANGLES);
+         glVertex2f(user->getX() -15, user->getY());
+         glVertex2f(user->getX() +15, user->getY());
+         glVertex2f(user->getX(), user->getY() + 19);
+      glEnd();
+   } else {
+      glBegin(GL_TRIANGLES);
+         glVertex2f(user->getX() -15, user->getY());
+         glVertex2f(user->getX() +15, user->getY());
+         glVertex2f(user->getX(), user->getY() - 19);
+      glEnd();
+   }
+   
 
    glFlush();
+
+   printf("Redrawing again and again\n");
 }
 
 
 int main(int argc, char** argv) {
 
+   user = new User();
+   printf("created user");
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(ww, wh);
 	glutCreateWindow("CrossLane");
 	myinit();
-	glutReshapeFunc(myReshape);
+	//glutReshapeFunc(myReshape);
 	glutMouseFunc(myMouse);
 	//glutMotionFunc(makeSquare);
 	glutDisplayFunc(myDisplay);
-	glutKeyboardFunc(myKeyboard);
-   glutTimerFunc(200, createPassingVehicles, 0);
+	glutKeyboardFunc(keyInput);
+   glutSpecialFunc(moveUser);
+   glutIdleFunc(transpassingVehicle);
 	//srand(time(NULL));
 	glutMainLoop();
 }

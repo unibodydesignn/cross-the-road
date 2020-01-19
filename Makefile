@@ -1,7 +1,8 @@
 LDFLAGS=-L/Users/unibodydesignn/Desktop/lib -framework Cocoa -framework OpenGL  -framework GLUT  -lGLEW -lm
-
 CC = g++
 CFLAGS=-g -I/Users/unibodydesignn/Desktop/include
+OBJFILES = *.o
+TARGET = crossroad
 
 crossroad: crossroad.o 
 	$(CC) $@.o $(LDFLAGS) -o $@
@@ -11,3 +12,4 @@ crossroad: crossroad.o
 
 clean: 
 	-rm -r example0 *.o core *.dSYM
+

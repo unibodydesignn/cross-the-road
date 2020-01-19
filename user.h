@@ -1,41 +1,29 @@
 #include <iostream> 
 
+using namespace std;
+
 class User {
 
 private:
-    bool direction;
+    bool direction; // true = up --- false = down
     float xCo;
     float yCo;
-
 public:
-    User() {
-        xCo = 250;
-        yCo = 0;
-    }
 
-    ~User() {
-        xCo = 250;
-        yCo = 0;
-    }
+    User();
+    ~User();
+    
+    void setXY(float x, float y);
 
-    void setXY(float x, float y) {
-        xCo = x;
-        yCo = y;
-    }
+    void setX(float x);
 
-    void setX(float x) {
-        xCo = x;
-    }
+    void setY(float y);
 
-    void setY(float y) {
-        yCo = y;
-    }
+    float getX();
 
-    float getX() {
-        return xCo;
-    }
+    float getY();
 
-    float getY() {
-        return yCo;
-    }
+    bool getDirection();
+
+    void setDirection(bool d);
 };
