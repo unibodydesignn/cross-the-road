@@ -5,14 +5,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
-#include <vector> 
+#include <vector>
+#include <queue> 
 #include <GLUT/glut.h>
-
+#include <math.h>
+#include <random>
 //#include "truck.h"
 //#include "car.h"
 //#include "user.h"
-
 #pragma once
+
+#define PI 3.1415926535897932384626433832795
+#define RADIUS 5
 using namespace std;
 
 struct User {
@@ -64,20 +68,159 @@ struct User {
 };
 
 struct Truck {
+   private:
 
+      float wid;
+      float hgt;
+
+      float xCo;
+      float yCo;
+      float v;
+      bool direction; // true = right --- false = left
+
+public:
+    Truck(float w, float h) {
+        wid = w;
+        hgt = h;
+    }
+
+    Truck(const Truck &otherTruck) {
+        xCo = otherTruck.xCo;
+        yCo = otherTruck.yCo;
+    }
+
+    ~Truck() {
+        xCo = 0;
+        yCo = 0;
+    }
+
+    void setCoordinate(float x, float y) {
+        xCo = x;
+        yCo = y;
+    }
+
+    void setVelocity(float vel) {
+        v = vel;
+    } 
+
+    void setDirection(bool d) {
+        direction = d;
+    }
+
+    void setX(float x) {
+        xCo = x;
+    }
+
+    float getX() {
+        return xCo;
+    }
+
+   void setY(float y) {
+       yCo = y;
+    }
+
+   float getY() {
+      return yCo;
+   }
+
+    float getVelocity() {
+        return v;
+    }
 };
 
 struct Car {
+   private:
 
+      float wid;
+      float hgt;
+
+      float xCo;
+      float yCo;
+      float v;
+      bool direction; // true = right --- false = left
+
+public:
+    Car(float w, float h) {
+        wid = w;
+        hgt = h;
+    }
+
+    Car(const Car &otherTruck) {
+        xCo = otherTruck.xCo;
+        yCo = otherTruck.yCo;
+    }
+
+    ~Car() {
+        xCo = 0;
+        yCo = 0;
+    }
+
+    void setCoordinate(float x, float y) {
+        xCo = x;
+        yCo = y;
+    }
+
+    void setVelocity(float vel) {
+        v = vel;
+    } 
+
+    void setDirection(bool d) {
+        direction = d;
+    }
+
+    void setX(float x) {
+        xCo = x;
+    }
+
+    float getX() {
+        return xCo;
+    }
+
+   void setY(float y) {
+       yCo = y;
+    }
+
+   float getY() {
+      return yCo;
+   }
+
+    float getVelocity() {
+        return v;
+    }
+};
+
+struct Coin {
+
+private:
+   int xCo;
+   int yCo;
+public:
+   void setX(int x) {
+      xCo = x;
+   }
+
+   int getX() {
+      return xCo;
+   }
+
+   void setY(int y) {
+      yCo = y;
+   }
+
+   int getY() {
+      return yCo;
+   }
 };
 
 
 GLsizei wh = 600, ww = 500; /* initial window size */
 GLfloat size = 3.0;   /* half side length of square */
-vector<Truck> trucks;
-vector<Car> cars;
+queue<Truck> *trucks;
+queue<Car> *cars;
+vector<Coin> *coins;
 float deltaVelocity = 10.2;
 User *user;
+int totalScore = 0;
 /* rehaping routine called whenever window is resized
 or moved */
 
@@ -162,8 +305,66 @@ void myMouse(int btn, int state, int x, int y)
 		exit(0); /*terminate the program through OpenGL */
 }
 
-void transpassingVehicle() {
+void passingTrucks() {
+
    
+
+}
+
+void passingCars() {
+
+}
+
+bool checkCarCollision(Truck &otherTruck) {
+   bool collisionX = false;
+   bool collisionY = false;
+
+   collisionX = user->getX() >= otherTruck.getX() & otherTruck.getX() >= user->getX();
+   collisionY = user->getY() >= otherTruck.getY() & otherTruck.getY() >= user->getY();
+ 
+   return collisionX & collisionY;
+}
+
+bool checkTruckCollision(Car &otherCar) {
+
+   bool collisionX = false;
+   bool collisionY = false;
+
+   collisionX = user->getX() >= otherCar.getX() & otherCar.getX() >= user->getX();
+   collisionY = user->getY() >= otherCar.getY() & otherCar.getY() >= user->getY();
+ 
+   return collisionX & collisionY;
+
+}
+
+bool checkCoinCollision(Coin &coin) {
+
+   bool collisionX = false;
+   bool collisionY = false;
+
+   collisionX = user->getX() >= coin.getX() & coin.getX() >= user->getX();
+   collisionY = user->getY() >= coin.getY() & coin.getY() >= user->getY();
+ 
+   return collisionX & collisionY;
+}
+
+void coinGeneration() {
+
+   int x = 10 + (rand() % static_cast<int>(500 - 10 + 1));
+   int y = 10 + (rand() % static_cast<int>(600 - 10 + 1));
+   // Adding integer in front of sin and cos, specifies the coordinates of the circle
+   glColor3f(1.0f, 1.0f, 0.0f);
+   for(int c = 0; c < 10; c++) {
+      Coin coin;
+      coin.setX(x);
+      coin.setY(y);
+
+      glBegin(GL_POLYGON);
+      for(double i = 0; i < 2 * PI; i += PI / 36) //<-- Change this Value
+ 		   glVertex3f(x + cos(i) * RADIUS, y + sin(i) * RADIUS, 0.0);
+      glEnd();
+   }
+   glFlush();
 }
 
 void keyInput(unsigned char key, int x, int y)
@@ -261,30 +462,26 @@ void myDisplay(void)
          glVertex2f(user->getX(), user->getY() - 19);
       glEnd();
    }
-   
 
    glFlush();
-
-   printf("Redrawing again and again\n");
 }
 
 
 int main(int argc, char** argv) {
 
    user = new User();
-   printf("created user");
+   cars = new queue<Car>();
+   trucks = new queue<Truck>();
+   coins = new vector<Coin>(10);
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(ww, wh);
 	glutCreateWindow("CrossLane");
 	myinit();
-	//glutReshapeFunc(myReshape);
 	glutMouseFunc(myMouse);
-	//glutMotionFunc(makeSquare);
 	glutDisplayFunc(myDisplay);
 	glutKeyboardFunc(keyInput);
    glutSpecialFunc(moveUser);
-   glutIdleFunc(transpassingVehicle);
-	//srand(time(NULL));
 	glutMainLoop();
 }
