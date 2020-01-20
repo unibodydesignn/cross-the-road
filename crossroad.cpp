@@ -217,7 +217,7 @@ GLsizei wh = 600, ww = 500; /* initial window size */
 GLfloat size = 3.0;   /* half side length of square */
 queue<Truck> *trucks;
 queue<Car> *cars;
-vector<Coin> *coins;
+vector<Coin> coins;
 float deltaVelocity = 10.2;
 User *user;
 int totalScore = 0;
@@ -226,27 +226,27 @@ or moved */
 
 void myReshape(GLsizei w, GLsizei h)
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
 
-	glViewport(0, 0, w, h);
+   glViewport(0, 0, w, h);
 
-	ww = w;
-	wh = h;
+   ww = w;
+   wh = h;
 }
 
 void myinit(void)
 {
-	glViewport(0, 0, ww, wh);
+   glViewport(0, 0, ww, wh);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluOrtho2D(0.0, (GLdouble)ww, 0.0, (GLdouble)wh);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(0.0, (GLdouble)ww, 0.0, (GLdouble)wh);
 
-	glClearColor(1.0, 1.0, 1.0, 0.0);
+   glClearColor(0.0, 0.0, 0.0, 0.0);
 }
 
 void moveUser(int key, int x, int y) {
@@ -301,8 +301,8 @@ void moveUser(int key, int x, int y) {
 
 void myMouse(int btn, int state, int x, int y)
 {
-	if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-		exit(0); /*terminate the program through OpenGL */
+   if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+      exit(0); /*terminate the program through OpenGL */
 }
 
 void passingTrucks() {
@@ -349,22 +349,33 @@ bool checkCoinCollision(Coin &coin) {
 }
 
 void coinGeneration() {
-
-   int x = 10 + (rand() % static_cast<int>(500 - 10 + 1));
-   int y = 10 + (rand() % static_cast<int>(600 - 10 + 1));
-   // Adding integer in front of sin and cos, specifies the coordinates of the circle
+   coins.clear();
    glColor3f(1.0f, 1.0f, 0.0f);
    for(int c = 0; c < 10; c++) {
+      int x = 10 + (rand() % static_cast<int>(500 - 10 + 1));
+      int y = 10 + (rand() % static_cast<int>(600 - 10 + 1));
       Coin coin;
       coin.setX(x);
       coin.setY(y);
+      coins.push_back(coin);
+      if (c == 9) {
+         break;
+      }
+   }
+}
 
+void coinDrawing(int value) {
+   
+   int v = value;
+   coinGeneration();
+   for(auto &coin : coins) {
       glBegin(GL_POLYGON);
       for(double i = 0; i < 2 * PI; i += PI / 36) //<-- Change this Value
- 		   glVertex3f(x + cos(i) * RADIUS, y + sin(i) * RADIUS, 0.0);
+          glVertex3f(coin.getX() + cos(i) * RADIUS, coin.getY() + sin(i) * RADIUS, 0.0);
       glEnd();
+      glFlush();
    }
-   glFlush();
+   
 }
 
 void keyInput(unsigned char key, int x, int y)
@@ -383,7 +394,7 @@ void myDisplay(void)
 {   
    glClear(GL_COLOR_BUFFER_BIT);
    //glLoadIdentity();
-   glColor3f(0.0, 0.0, 0.0f);
+   glColor3f(1.0, 1.0, 1.0f);
 
    //Bottom lane
    glBegin(GL_POLYGON);
@@ -437,7 +448,7 @@ void myDisplay(void)
    glEnd();
   
    // Draws the road lane one by one
-   glColor3f(0.0f, 0.0f, 0.0f);
+   glColor3f(1.0f, 1.0f, 1.0f);
    for(int y = 40; y < 600; y += 20) {
       for(int x = 0; x < 500; x += 20) {
          glBegin(GL_LINES);
@@ -472,16 +483,17 @@ int main(int argc, char** argv) {
    user = new User();
    cars = new queue<Car>();
    trucks = new queue<Truck>();
-   coins = new vector<Coin>(10);
+   //coins = new vector<Coin>(10);
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutInitWindowSize(ww, wh);
-	glutCreateWindow("CrossLane");
-	myinit();
-	glutMouseFunc(myMouse);
-	glutDisplayFunc(myDisplay);
-	glutKeyboardFunc(keyInput);
+   glutInit(&argc, argv);
+   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+   glutInitWindowSize(ww, wh);
+   glutCreateWindow("CrossLane");
+   myinit();
+   glutMouseFunc(myMouse);
+   glutDisplayFunc(myDisplay);
+   glutKeyboardFunc(keyInput);
    glutSpecialFunc(moveUser);
-	glutMainLoop();
+   glutTimerFunc(1000, coinDrawing, 0);
+   glutMainLoop();
 }
