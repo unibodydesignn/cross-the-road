@@ -5,19 +5,32 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
-#include <vector>
+#include <unordered_map>
 #include <queue> 
 #include <GLUT/glut.h>
 #include <math.h>
+#include <thread>
+#include <unistd.h>
 #include <random>
+#include <algorithm>
+
 //#include "truck.h"
 //#include "car.h"
 //#include "user.h"
 #pragma once
 
 #define PI 3.1415926535897932384626433832795
-#define RADIUS 5
+#define RADIUS 9
 using namespace std;
+
+
+float random_float(float min, float max) {
+	return ((float)rand() / RAND_MAX) * (max - min) + min;
+}
+
+int random_integer(int min, int max) {
+   return min + (rand() % static_cast<int>(max - min + 1));
+}
 
 struct User {
 
@@ -67,8 +80,10 @@ struct User {
    }
 };
 
-struct Truck {
+typedef struct Truck {
    private:
+
+      uint32_t tID;
 
       float wid;
       float hgt;
@@ -79,6 +94,11 @@ struct Truck {
       bool direction; // true = right --- false = left
 
 public:
+
+	Truck() {
+
+	}
+
     Truck(float w, float h) {
         wid = w;
         hgt = h;
@@ -126,10 +146,20 @@ public:
     float getVelocity() {
         return v;
     }
+
+    void setID(uint32_t id) {
+       tID = id;
+    }
+
+    uint32_t getID() {
+       return tID;
+    }
 };
 
 struct Car {
    private:
+
+      uint32_t cID;
 
       float wid;
       float hgt;
@@ -140,6 +170,10 @@ struct Car {
       bool direction; // true = right --- false = left
 
 public:
+	Car() {
+
+	}
+
     Car(float w, float h) {
         wid = w;
         hgt = h;
@@ -187,6 +221,14 @@ public:
     float getVelocity() {
         return v;
     }
+
+    void setID(uint32_t id) {
+       cID = id;
+    }
+
+    uint32_t getID() {
+       return cID;
+    }
 };
 
 struct Coin {
@@ -212,15 +254,16 @@ public:
    }
 };
 
-
 GLsizei wh = 600, ww = 500; /* initial window size */
 GLfloat size = 3.0;   /* half side length of square */
-queue<Truck> *trucks;
-queue<Car> *cars;
+unordered_map<uint32_t, Truck> *trucks;
+unordered_map<uint32_t, Car> *cars;
 vector<Coin> coins;
 float deltaVelocity = 10.2;
 User *user;
 int totalScore = 0;
+uint32_t UID = 0;
+
 /* rehaping routine called whenever window is resized
 or moved */
 
@@ -278,7 +321,6 @@ void moveUser(int key, int x, int y) {
          } else {
             user->setX(user->getX() - 10);
          }
-         
          printf("LEFT User location %f %f \n", user->getX(), user->getY());
          break;
       case GLUT_KEY_RIGHT:
@@ -295,24 +337,12 @@ void moveUser(int key, int x, int y) {
       default:
          exit(0);
    }
-   //glutPostRedisplay();
-   //glFlush();
 }
 
 void myMouse(int btn, int state, int x, int y)
 {
    if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
       exit(0); /*terminate the program through OpenGL */
-}
-
-void passingTrucks() {
-
-   
-
-}
-
-void passingCars() {
-
 }
 
 bool checkCarCollision(Truck &otherTruck) {
@@ -348,7 +378,7 @@ bool checkCoinCollision(Coin &coin) {
    return collisionX & collisionY;
 }
 
-void coinGeneration() {
+void coinGeneration(int value) {
    coins.clear();
    glColor3f(1.0f, 1.0f, 0.0f);
    for(int c = 0; c < 10; c++) {
@@ -365,17 +395,15 @@ void coinGeneration() {
 }
 
 void coinDrawing(int value) {
-   
+   glColor3f(1.0f, 1.0f, 0.0f);
    int v = value;
-   coinGeneration();
    for(auto &coin : coins) {
       glBegin(GL_POLYGON);
       for(double i = 0; i < 2 * PI; i += PI / 36) //<-- Change this Value
           glVertex3f(coin.getX() + cos(i) * RADIUS, coin.getY() + sin(i) * RADIUS, 0.0);
       glEnd();
-      glFlush();
    }
-   
+   glFlush();
 }
 
 void keyInput(unsigned char key, int x, int y)
@@ -388,6 +416,13 @@ void keyInput(unsigned char key, int x, int y)
       default:
          break;
    }
+}
+
+void movingVehicles(int value) {
+   user->setY(user->getY() + 1.0);
+   printf("user y %f \r", user->getY());
+   glutPostRedisplay();
+   glutTimerFunc(25, movingVehicles, 0);
 }
 
 void myDisplay(void)
@@ -474,17 +509,107 @@ void myDisplay(void)
       glEnd();
    }
 
+   printf("Size of map! %d\n", trucks->size());
+
+   for(auto it = trucks->begin(); it != trucks->end(); it++) {
+      int x = it->second.getX();
+      int y = it->second.getY();
+
+      printf("Drawing a truck! ->   X : %d, Y : %d \n", x, y);
+
+      glBegin(GL_POLYGON);
+         glVertex2f(x - 18, y + 9);
+         glVertex2f(x + 18, y + 9);
+         glVertex2f(x + 18, y - 9);
+         glVertex2f(x - 18, y - 9);
+      glEnd();
+   }
+
+   for(auto it = cars->begin(); it != cars->end(); it++) {
+      int x = it->second.getX();
+      int y = it->second.getY();
+
+      printf("Drawing a car! ->   X : %d, Y : %d \n", x, y);
+
+      glBegin(GL_POLYGON);
+         glVertex2f(x - 9, y + 9);
+         glVertex2f(x + 9, y + 9);
+         glVertex2f(x + 9, y - 9);
+         glVertex2f(x - 9, y - 9);
+      glEnd();
+   }
+
+   coinDrawing(0);
+
    glFlush();
+}
+
+void generateVehicles(int value) { 
+   printf("Entered to functionn!\n");
+   // random y coordinate of vehicle to be generated 
+   int yLine = random_integer(1, 120);
+   if (yLine != 1 || yLine != 6 || yLine != 10 || yLine != 15 || yLine != 21 || yLine != 26 || yLine != 30 ) { 
+      printf("Serit sirasi : %d\n", yLine);
+      yLine = yLine * 10; - 5;
+      printf("After *5 %d \n", yLine);
+      int choice = 1 + (rand() % static_cast<int>(2 - 1 + 1));
+      float velocity = random_float(0, 1);
+      printf("GENERATED VELOCITY %f \n", velocity);
+      if (choice == 1) {
+         Car car(18, 18);
+         car.setX(0);
+         car.setY(yLine);
+         car.setVelocity(velocity);
+         car.setID(++UID);
+         cars->insert(make_pair(car.getID(), car));
+      } else if (choice == 2) {
+         Truck truck(18, 36);
+         truck.setX(0);
+         truck.setY(yLine);
+         truck.setVelocity(velocity);
+         truck.setID(++UID);
+         trucks->insert(make_pair(truck.getID(), truck));
+      } else {
+         printf("No vehicle has been generated! \n");
+      }
+      
+   }
+   printf("Something happening here! \n");
+   glutPostRedisplay();
+   glutTimerFunc(100, generateVehicles, 0);
+   printf("END OF FUCK!\n");
+}
+
+void passingVehicles(int value) {
+   printf("PASSING VEHICLES BEGIN!\n");
+   for(auto it = cars->begin(); it != cars->end(); it++) {
+      it->second.setX(it->second.getX() + it->second.getVelocity() * 10);
+      printf("VEHICLE X %d\n", it->second.getX());
+      if (it->second.getX() >= 500) {
+         printf("remove begin %d\n", it->second.getX());
+         it = cars->erase(it);
+         printf("remove end\n");
+      }
+   }
+
+   for(auto it = trucks->begin(); it != trucks->end(); it++) {
+      it->second.setX(it->second.getX() + it->second.getVelocity() * 10);
+      printf("VEHICLE X %d\n", it->second.getX());
+      if (it->second.getX() >= 500) {
+         it = trucks->erase(it);
+      }
+   }
+   printf("PASSING VEHICLES END!\n");
+   glutPostRedisplay();
+   glutTimerFunc(100, passingVehicles, 2);
 }
 
 
 int main(int argc, char** argv) {
 
    user = new User();
-   cars = new queue<Car>();
-   trucks = new queue<Truck>();
-   //coins = new vector<Coin>(10);
-
+   trucks = new unordered_map<uint32_t, Truck>(10);
+   cars = new unordered_map<uint32_t, Car>(10);
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
    glutInitWindowSize(ww, wh);
@@ -494,6 +619,9 @@ int main(int argc, char** argv) {
    glutDisplayFunc(myDisplay);
    glutKeyboardFunc(keyInput);
    glutSpecialFunc(moveUser);
-   glutTimerFunc(1000, coinDrawing, 0);
+   glutTimerFunc(200, generateVehicles, 0);
+   glutTimerFunc(300, passingVehicles, 2);
+   glutTimerFunc(500, coinGeneration, 1);
+   
    glutMainLoop();
 }
