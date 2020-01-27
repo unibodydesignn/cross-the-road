@@ -25,7 +25,9 @@ using namespace std;
 
 
 float random_float(float min, float max) {
-	return ((float)rand() / RAND_MAX) * (max - min) + min;
+   float y = ((float)rand() / RAND_MAX) * (max - min) + min;
+   printf("%lf\n",y);
+	return y;
 }
 
 int random_integer(int min, int max) {
@@ -107,6 +109,10 @@ public:
     Truck(const Truck &otherTruck) {
         xCo = otherTruck.xCo;
         yCo = otherTruck.yCo;
+        v = otherTruck.v;
+        wid = otherTruck.wid;
+        hgt = otherTruck.hgt;
+        direction = otherTruck.direction;
     }
 
     ~Truck() {
@@ -179,9 +185,13 @@ public:
         hgt = h;
     }
 
-    Car(const Car &otherTruck) {
-        xCo = otherTruck.xCo;
-        yCo = otherTruck.yCo;
+    Car(const Car &otherCar) {
+        xCo = otherCar.xCo;
+        yCo = otherCar.yCo;
+        v = otherCar.v;
+        wid = otherCar.wid;
+        hgt = otherCar.hgt;
+        direction = otherCar.direction;
     }
 
     ~Car() {
@@ -203,7 +213,7 @@ public:
     }
 
     void setX(float x) {
-        xCo = x;
+         xCo = x;
     }
 
     float getX() {
@@ -295,44 +305,40 @@ void myinit(void)
 void moveUser(int key, int x, int y) {
    switch (key) {
       case GLUT_KEY_UP:
-         glutPostRedisplay();
+         
          if (user->getY() >= 580) {
             user->setY(600);
          } else {
             user->setY(user->getY() + 20);
          }
          user->setDirection(true);
-         printf("UP User location %f %f \n", user->getX(), user->getY());
+         glutPostRedisplay();
          break;
       case GLUT_KEY_DOWN:
-         glutPostRedisplay();
+         
          if (user->getY() <= 20) {
             user->setY(0);
          } else {
             user->setY(user->getY() - 20);
          }
          user->setDirection(false);
-         printf("DOWN User location %f %f \n", user->getX(), user->getY());
+         glutPostRedisplay();
          break;
       case GLUT_KEY_LEFT:
-      glutPostRedisplay();
          if (user->getX() <= 10) {
             user->setX(0);
          } else {
             user->setX(user->getX() - 10);
          }
-         printf("LEFT User location %f %f \n", user->getX(), user->getY());
+         glutPostRedisplay();
          break;
       case GLUT_KEY_RIGHT:
-      glutPostRedisplay();
-         printf("Tusa basildi");
          if (user->getX() >= 490) {
             user->setX(500);
          } else {
             user->setX(user->getX() + 10);
          }
-         
-         printf("RIGHT User location %f %f \n", user->getX(), user->getY());
+         glutPostRedisplay();
          break;
       default:
          exit(0);
@@ -418,12 +424,6 @@ void keyInput(unsigned char key, int x, int y)
    }
 }
 
-void movingVehicles(int value) {
-   user->setY(user->getY() + 1.0);
-   printf("user y %f \r", user->getY());
-   glutPostRedisplay();
-   glutTimerFunc(25, movingVehicles, 0);
-}
 
 void myDisplay(void)
 {   
@@ -509,13 +509,9 @@ void myDisplay(void)
       glEnd();
    }
 
-   printf("Size of map! %d\n", trucks->size());
-
    for(auto it = trucks->begin(); it != trucks->end(); it++) {
       int x = it->second.getX();
       int y = it->second.getY();
-
-      printf("Drawing a truck! ->   X : %d, Y : %d \n", x, y);
 
       glBegin(GL_POLYGON);
          glVertex2f(x - 18, y + 9);
@@ -528,8 +524,6 @@ void myDisplay(void)
    for(auto it = cars->begin(); it != cars->end(); it++) {
       int x = it->second.getX();
       int y = it->second.getY();
-
-      printf("Drawing a car! ->   X : %d, Y : %d \n", x, y);
 
       glBegin(GL_POLYGON);
          glVertex2f(x - 9, y + 9);
@@ -544,22 +538,19 @@ void myDisplay(void)
    glFlush();
 }
 
+
 void generateVehicles(int value) { 
-   printf("Entered to functionn!\n");
-   // random y coordinate of vehicle to be generated 
-   int yLine = random_integer(1, 120);
+   int yLine = random_integer(1, 30);
    if (yLine != 1 || yLine != 6 || yLine != 10 || yLine != 15 || yLine != 21 || yLine != 26 || yLine != 30 ) { 
-      printf("Serit sirasi : %d\n", yLine);
       yLine = yLine * 10; - 5;
-      printf("After *5 %d \n", yLine);
       int choice = 1 + (rand() % static_cast<int>(2 - 1 + 1));
       float velocity = random_float(0, 1);
-      printf("GENERATED VELOCITY %f \n", velocity);
       if (choice == 1) {
          Car car(18, 18);
          car.setX(0);
          car.setY(yLine);
          car.setVelocity(velocity);
+         printf("Velocity : %lf\n", car.getVelocity());
          car.setID(++UID);
          cars->insert(make_pair(car.getID(), car));
       } else if (choice == 2) {
@@ -571,35 +562,42 @@ void generateVehicles(int value) {
          trucks->insert(make_pair(truck.getID(), truck));
       } else {
          printf("No vehicle has been generated! \n");
-      }
-      
+      }  
    }
-   printf("Something happening here! \n");
    glutPostRedisplay();
-   glutTimerFunc(100, generateVehicles, 0);
-   printf("END OF FUCK!\n");
+   glutTimerFunc(500, generateVehicles, 0);
 }
 
 void passingVehicles(int value) {
-   printf("PASSING VEHICLES BEGIN!\n");
+
+   vector<uint32_t> *idList = new vector<uint32_t>(cars->size());
+
    for(auto it = cars->begin(); it != cars->end(); it++) {
-      it->second.setX(it->second.getX() + it->second.getVelocity() * 10);
-      printf("VEHICLE X %d\n", it->second.getX());
+      float temp2 = it->second.getVelocity();
+      float temp = (temp2 *10) + it->second.getX();
+      it->second.setX(temp);
       if (it->second.getX() >= 500) {
-         printf("remove begin %d\n", it->second.getX());
-         it = cars->erase(it);
-         printf("remove end\n");
+         idList->push_back(it->first);
       }
+   }
+
+   for(auto key : *idList) {
+      cars->erase(key);
    }
 
    for(auto it = trucks->begin(); it != trucks->end(); it++) {
       it->second.setX(it->second.getX() + it->second.getVelocity() * 10);
-      printf("VEHICLE X %d\n", it->second.getX());
       if (it->second.getX() >= 500) {
-         it = trucks->erase(it);
+         idList->push_back(it->first);
       }
    }
-   printf("PASSING VEHICLES END!\n");
+
+   for(auto key : *idList) {
+      trucks->erase(key);
+   }
+
+   delete idList;
+   
    glutPostRedisplay();
    glutTimerFunc(100, passingVehicles, 2);
 }
@@ -610,6 +608,7 @@ int main(int argc, char** argv) {
    user = new User();
    trucks = new unordered_map<uint32_t, Truck>(10);
    cars = new unordered_map<uint32_t, Car>(10);
+
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
    glutInitWindowSize(ww, wh);
@@ -619,9 +618,8 @@ int main(int argc, char** argv) {
    glutDisplayFunc(myDisplay);
    glutKeyboardFunc(keyInput);
    glutSpecialFunc(moveUser);
-   glutTimerFunc(200, generateVehicles, 0);
-   glutTimerFunc(300, passingVehicles, 2);
-   glutTimerFunc(500, coinGeneration, 1);
-   
+   glutTimerFunc(500, generateVehicles, 0);
+   glutTimerFunc(500, passingVehicles, 2);
+   //glutTimerFunc(500, coinGeneration, 1);
    glutMainLoop();
 }
