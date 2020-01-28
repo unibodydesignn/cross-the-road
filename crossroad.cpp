@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <random>
 #include <algorithm>
-
+#include <vector>
 //#include "truck.h"
 //#include "car.h"
 //#include "user.h"
@@ -23,10 +23,10 @@
 #define RADIUS 9
 using namespace std;
 
+bool isCrashed();
 
 float random_float(float min, float max) {
    float y = ((float)rand() / RAND_MAX) * (max - min) + min;
-   printf("%lf\n",y);
 	return y;
 }
 
@@ -42,7 +42,7 @@ struct User {
 
    User() {
       xCo = 250;
-      yCo = 0;
+      yCo = 10;
       direction = true;
       printf("User has been constructed;\n");
    }
@@ -113,6 +113,7 @@ public:
         wid = otherTruck.wid;
         hgt = otherTruck.hgt;
         direction = otherTruck.direction;
+        tID = otherTruck.tID;
     }
 
     ~Truck() {
@@ -192,6 +193,7 @@ public:
         wid = otherCar.wid;
         hgt = otherCar.hgt;
         direction = otherCar.direction;
+        cID = otherCar.cID;
     }
 
     ~Car() {
@@ -268,7 +270,7 @@ GLsizei wh = 600, ww = 500; /* initial window size */
 GLfloat size = 3.0;   /* half side length of square */
 unordered_map<uint32_t, Truck> *trucks;
 unordered_map<uint32_t, Car> *cars;
-vector<Coin> coins;
+vector<Coin> *coins;
 float deltaVelocity = 10.2;
 User *user;
 int totalScore = 0;
@@ -312,6 +314,9 @@ void moveUser(int key, int x, int y) {
             user->setY(user->getY() + 20);
          }
          user->setDirection(true);
+         if (isCrashed()) {
+            printf("CRASH! \n");
+         }
          glutPostRedisplay();
          break;
       case GLUT_KEY_DOWN:
@@ -322,6 +327,11 @@ void moveUser(int key, int x, int y) {
             user->setY(user->getY() - 20);
          }
          user->setDirection(false);
+
+         if (isCrashed()) {
+            printf("CRASH! \n");
+         }
+
          glutPostRedisplay();
          break;
       case GLUT_KEY_LEFT:
@@ -330,6 +340,11 @@ void moveUser(int key, int x, int y) {
          } else {
             user->setX(user->getX() - 10);
          }
+
+         if (isCrashed()) {
+            printf("CRASH! \n");
+         }
+
          glutPostRedisplay();
          break;
       case GLUT_KEY_RIGHT:
@@ -338,6 +353,11 @@ void moveUser(int key, int x, int y) {
          } else {
             user->setX(user->getX() + 10);
          }
+
+         if (isCrashed()) {
+            printf("CRASH! \n");
+         }
+
          glutPostRedisplay();
          break;
       default:
@@ -351,41 +371,56 @@ void myMouse(int btn, int state, int x, int y)
       exit(0); /*terminate the program through OpenGL */
 }
 
-bool checkCarCollision(Truck &otherTruck) {
+bool checkCarCollision(Car &otherCar) {
+   bool collisionXLeft = false;
+   bool collisionXRight = false;
+   bool collisionY = false;
+
+   collisionXLeft = user->getX() + 10 >= otherCar.getX() -10 && otherCar.getX() - 10 <= user->getX() + 10;
+   collisionXRight = user->getX() -10 <= otherCar.getX() + 10 && otherCar.getX() + 10 >= user->getX() - 10;
+   collisionY = user->getY() >= otherCar.getY() && otherCar.getY() >= user->getY();
+
+   printf("INFO : userX -> %lf, userY -> %lf, carX : %lf, carY : %lf \n", user->getX(), user->getY(), otherCar.getX(), otherCar.getY());
+   
+   //printf("status X : %s, Y : %s \n\n", collisionX ? "true" : "false", collisionY ? "true" : "false");
+ 
+   return (collisionXLeft || collisionXRight) && collisionY;
+
+}
+
+
+bool checkTruckCollision(Truck &otherTruck) {
+
    bool collisionX = false;
    bool collisionY = false;
 
-   collisionX = user->getX() >= otherTruck.getX() & otherTruck.getX() >= user->getX();
-   collisionY = user->getY() >= otherTruck.getY() & otherTruck.getY() >= user->getY();
+   collisionX = user->getX() >= otherTruck.getX() && otherTruck.getX() >= user->getX();
+   collisionY = user->getY() >= otherTruck.getY() && otherTruck.getY() >= user->getY();
  
-   return collisionX & collisionY;
+   return collisionX && collisionY;
 }
 
-bool checkTruckCollision(Car &otherCar) {
-
-   bool collisionX = false;
-   bool collisionY = false;
-
-   collisionX = user->getX() >= otherCar.getX() & otherCar.getX() >= user->getX();
-   collisionY = user->getY() >= otherCar.getY() & otherCar.getY() >= user->getY();
- 
-   return collisionX & collisionY;
-
-}
 
 bool checkCoinCollision(Coin &coin) {
 
    bool collisionX = false;
    bool collisionY = false;
 
-   collisionX = user->getX() >= coin.getX() & coin.getX() >= user->getX();
-   collisionY = user->getY() >= coin.getY() & coin.getY() >= user->getY();
+   collisionX = user->getX() + 10 >= coin.getX() - 10 && coin.getX() - 10 >= user->getX() + 10;
+   collisionY = user->getY() >= coin.getY() && coin.getY() >= user->getY();
  
-   return collisionX & collisionY;
+   return collisionX && collisionY;
 }
 
+bool isCollectedCoin() {
+
+   bool collected = false;
+   return collected;
+}
+
+
 void coinGeneration(int value) {
-   coins.clear();
+   coins->clear();
    glColor3f(1.0f, 1.0f, 0.0f);
    for(int c = 0; c < 10; c++) {
       int x = 10 + (rand() % static_cast<int>(500 - 10 + 1));
@@ -393,7 +428,7 @@ void coinGeneration(int value) {
       Coin coin;
       coin.setX(x);
       coin.setY(y);
-      coins.push_back(coin);
+      coins->push_back(coin);
       if (c == 9) {
          break;
       }
@@ -403,12 +438,13 @@ void coinGeneration(int value) {
 void coinDrawing(int value) {
    glColor3f(1.0f, 1.0f, 0.0f);
    int v = value;
-   for(auto &coin : coins) {
+   for(auto &coin : *coins) {
       glBegin(GL_POLYGON);
       for(double i = 0; i < 2 * PI; i += PI / 36) //<-- Change this Value
           glVertex3f(coin.getX() + cos(i) * RADIUS, coin.getY() + sin(i) * RADIUS, 0.0);
       glEnd();
    }
+   glutPostRedisplay();
    glFlush();
 }
 
@@ -497,42 +533,48 @@ void myDisplay(void)
    glColor3f(0.123f, 0.12, 1.0f);
    if (user->getDirection() == true) {
       glBegin(GL_TRIANGLES);
-         glVertex2f(user->getX() -15, user->getY());
-         glVertex2f(user->getX() +15, user->getY());
-         glVertex2f(user->getX(), user->getY() + 19);
+         glVertex2f(user->getX() -15, user->getY() -10);
+         glVertex2f(user->getX() +15, user->getY() -10);
+         glVertex2f(user->getX(), user->getY() + 10);
       glEnd();
    } else {
       glBegin(GL_TRIANGLES);
-         glVertex2f(user->getX() -15, user->getY());
-         glVertex2f(user->getX() +15, user->getY());
-         glVertex2f(user->getX(), user->getY() - 19);
+         glVertex2f(user->getX() -15, user->getY() + 10);
+         glVertex2f(user->getX() +15, user->getY() + 10);
+         glVertex2f(user->getX(), user->getY() - 10);
       glEnd();
    }
 
+   glColor3f(0.534, 0.653, 0.78);
    for(auto it = trucks->begin(); it != trucks->end(); it++) {
       int x = it->second.getX();
       int y = it->second.getY();
 
       glBegin(GL_POLYGON);
-         glVertex2f(x - 18, y + 9);
-         glVertex2f(x + 18, y + 9);
-         glVertex2f(x + 18, y - 9);
-         glVertex2f(x - 18, y - 9);
+         glVertex2f(x - 20, y + 10);
+         glVertex2f(x + 20, y + 10);
+         glVertex2f(x + 20, y - 10);
+         glVertex2f(x - 20, y - 10);
       glEnd();
+
    }
 
+   glColor3f(0.87, 0.53, 0.23);
    for(auto it = cars->begin(); it != cars->end(); it++) {
       int x = it->second.getX();
       int y = it->second.getY();
 
       glBegin(GL_POLYGON);
-         glVertex2f(x - 9, y + 9);
-         glVertex2f(x + 9, y + 9);
-         glVertex2f(x + 9, y - 9);
-         glVertex2f(x - 9, y - 9);
+         glVertex2f(x - 10, y + 10);
+         glVertex2f(x + 10, y + 10);
+         glVertex2f(x + 10, y - 10);
+         glVertex2f(x - 10, y - 10);
       glEnd();
    }
 
+   if (isCrashed()) {
+      printf("SOME CRASH! \n");
+   }
    coinDrawing(0);
 
    glFlush();
@@ -540,17 +582,19 @@ void myDisplay(void)
 
 
 void generateVehicles(int value) { 
-   int yLine = random_integer(1, 30);
-   if (yLine != 1 || yLine != 6 || yLine != 10 || yLine != 15 || yLine != 21 || yLine != 26 || yLine != 30 ) { 
-      yLine = yLine * 10; - 5;
+   int yLine = random_integer(1, 29);
+   
+   if (yLine == 0 || yLine == 5 || yLine == 9 || yLine == 14 || yLine == 20 || yLine == 25 || yLine == 30) { 
+      //printf(".... %d \n", yLine);
+   } else {
+      yLine = yLine * 20 + 10;
       int choice = 1 + (rand() % static_cast<int>(2 - 1 + 1));
-      float velocity = random_float(0, 1);
+      float velocity = random_float(0.5, 1);
       if (choice == 1) {
          Car car(18, 18);
          car.setX(0);
          car.setY(yLine);
          car.setVelocity(velocity);
-         printf("Velocity : %lf\n", car.getVelocity());
          car.setID(++UID);
          cars->insert(make_pair(car.getID(), car));
       } else if (choice == 2) {
@@ -562,7 +606,8 @@ void generateVehicles(int value) {
          trucks->insert(make_pair(truck.getID(), truck));
       } else {
          printf("No vehicle has been generated! \n");
-      }  
+      } 
+
    }
    glutPostRedisplay();
    glutTimerFunc(500, generateVehicles, 0);
@@ -602,16 +647,32 @@ void passingVehicles(int value) {
    glutTimerFunc(100, passingVehicles, 2);
 }
 
+bool isCrashed() {
+
+   for(auto it = trucks->begin(); it != trucks->end(); it++) { 
+      if (checkTruckCollision(it->second)) 
+         return true;
+   }
+
+   for(auto it = cars->begin(); it != cars->end(); it++) { 
+      if (checkCarCollision(it->second)) 
+         return true;
+   }
+
+   return false;
+}
+
 
 int main(int argc, char** argv) {
 
    user = new User();
    trucks = new unordered_map<uint32_t, Truck>(10);
    cars = new unordered_map<uint32_t, Car>(10);
-
+   coins = new vector<Coin>(10);
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
    glutInitWindowSize(ww, wh);
+   glutInitWindowPosition(0,0 );
    glutCreateWindow("CrossLane");
    myinit();
    glutMouseFunc(myMouse);
@@ -620,6 +681,6 @@ int main(int argc, char** argv) {
    glutSpecialFunc(moveUser);
    glutTimerFunc(500, generateVehicles, 0);
    glutTimerFunc(500, passingVehicles, 2);
-   //glutTimerFunc(500, coinGeneration, 1);
+   glutTimerFunc(500, coinGeneration, 1);
    glutMainLoop();
 }
