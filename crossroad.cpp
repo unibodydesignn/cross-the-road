@@ -14,16 +14,19 @@
 #include <random>
 #include <algorithm>
 #include <vector>
+#include <string>
 //#include "truck.h"
 //#include "car.h"
-//#include "user.h"
+#include "user.h"
 #pragma once
 
 #define PI 3.1415926535897932384626433832795
-#define RADIUS 9
+#define RADIUS 10
 using namespace std;
+bool paused = false;
 
 bool isCrashed();
+void bitMapString();
 
 float random_float(float min, float max) {
    float y = ((float)rand() / RAND_MAX) * (max - min) + min;
@@ -34,6 +37,7 @@ int random_integer(int min, int max) {
    return min + (rand() % static_cast<int>(max - min + 1));
 }
 
+/*
 struct User {
 
    bool direction;
@@ -81,7 +85,7 @@ struct User {
       direction = d;
    }
 };
-
+*/
 typedef struct Truck {
    private:
 
@@ -314,9 +318,10 @@ void moveUser(int key, int x, int y) {
             user->setY(user->getY() + 20);
          }
          user->setDirection(true);
-         if (isCrashed()) {
-            printf("CRASH! \n");
-         }
+
+         if(!isCrashed()) 
+            ++totalScore;
+       
          glutPostRedisplay();
          break;
       case GLUT_KEY_DOWN:
@@ -328,9 +333,8 @@ void moveUser(int key, int x, int y) {
          }
          user->setDirection(false);
 
-         if (isCrashed()) {
-            printf("CRASH! \n");
-         }
+         if(!isCrashed()) 
+            ++totalScore;
 
          glutPostRedisplay();
          break;
@@ -341,10 +345,6 @@ void moveUser(int key, int x, int y) {
             user->setX(user->getX() - 10);
          }
 
-         if (isCrashed()) {
-            printf("CRASH! \n");
-         }
-
          glutPostRedisplay();
          break;
       case GLUT_KEY_RIGHT:
@@ -352,10 +352,6 @@ void moveUser(int key, int x, int y) {
             user->setX(500);
          } else {
             user->setX(user->getX() + 10);
-         }
-
-         if (isCrashed()) {
-            printf("CRASH! \n");
          }
 
          glutPostRedisplay();
@@ -376,13 +372,13 @@ bool checkCarCollision(Car &otherCar) {
    bool collisionXRight = false;
    bool collisionY = false;
 
-   collisionXLeft = user->getX() + 10 >= otherCar.getX() -10 && otherCar.getX() - 10 <= user->getX() + 10;
-   collisionXRight = user->getX() -10 <= otherCar.getX() + 10 && otherCar.getX() + 10 >= user->getX() - 10;
+   collisionXLeft = user->getX() + 10 >= otherCar.getX() -10 && user->getX() -10 <= otherCar.getX() -10;
+   collisionXRight = user->getX() -10 <= otherCar.getX() + 10 && user->getX() - 10 >= otherCar.getX() + 10;
    collisionY = user->getY() >= otherCar.getY() && otherCar.getY() >= user->getY();
 
-   printf("INFO : userX -> %lf, userY -> %lf, carX : %lf, carY : %lf \n", user->getX(), user->getY(), otherCar.getX(), otherCar.getY());
+   //printf("INFO : userX -> %lf, userY -> %lf, carX : %lf, carY : %lf \n", user->getX(), user->getY(), otherCar.getX(), otherCar.getY());
    
-   //printf("status X : %s, Y : %s \n\n", collisionX ? "true" : "false", collisionY ? "true" : "false");
+   //printf("status X : %s, Y : %s \n\n", collisionXLeft ? "true" : "false", collisionXRight ? "true" : "false");
  
    return (collisionXLeft || collisionXRight) && collisionY;
 
@@ -391,30 +387,48 @@ bool checkCarCollision(Car &otherCar) {
 
 bool checkTruckCollision(Truck &otherTruck) {
 
-   bool collisionX = false;
+   bool collisionXLeft = false;
+   bool collisionXRight = false;
    bool collisionY = false;
 
-   collisionX = user->getX() >= otherTruck.getX() && otherTruck.getX() >= user->getX();
+   collisionXLeft = user->getX() + 10 >= otherTruck.getX() -10 && user->getX() -10 <= otherTruck.getX() -10;
+   collisionXRight = user->getX() -10 <= otherTruck.getX() + 10 && user->getX() - 10 >= otherTruck.getX() + 10;
    collisionY = user->getY() >= otherTruck.getY() && otherTruck.getY() >= user->getY();
+
+   //printf("INFO : userX -> %lf, userY -> %lf, carX : %lf, carY : %lf \n", user->getX(), user->getY(), otherCar.getX(), otherCar.getY());
+   
+   //printf("status XL : %s, XR : %s \n\n", collisionXLeft ? "true" : "false", collisionXRight ? "true" : "false");
  
-   return collisionX && collisionY;
+   return (collisionXLeft || collisionXRight) && collisionY;
 }
 
 
 bool checkCoinCollision(Coin &coin) {
 
-   bool collisionX = false;
+   bool collisionXLeft = false;
+   bool collisionXRight = false;
    bool collisionY = false;
 
-   collisionX = user->getX() + 10 >= coin.getX() - 10 && coin.getX() - 10 >= user->getX() + 10;
+   collisionXLeft = user->getX() + 10 >= coin.getX()  && user->getX() <= coin.getX();
+   collisionXRight = user->getX() -10 <= coin.getX()  && user->getX()  >= coin.getX();
    collisionY = user->getY() >= coin.getY() && coin.getY() >= user->getY();
+
+   //printf("INFO : userX -> %lf, userY -> %lf, carX : %lf, carY : %lf \n", user->getX(), user->getY(), otherCar.getX(), otherCar.getY());
+   
+   //printf("status XL : %s, XR : %s \n\n", collisionXLeft ? "true" : "false", collisionXRight ? "true" : "false");
  
-   return collisionX && collisionY;
+   return (collisionXLeft || collisionXRight) && collisionY;
 }
 
 bool isCollectedCoin() {
 
    bool collected = false;
+   for(int i = 0; i < coins->size(); i++) {
+      if(checkCoinCollision(coins->at(i))) {
+         coins->erase(coins->begin() + i);
+         return true;
+      }
+   }
    return collected;
 }
 
@@ -424,7 +438,8 @@ void coinGeneration(int value) {
    glColor3f(1.0f, 1.0f, 0.0f);
    for(int c = 0; c < 10; c++) {
       int x = 10 + (rand() % static_cast<int>(500 - 10 + 1));
-      int y = 10 + (rand() % static_cast<int>(600 - 10 + 1));
+      int y = 10 + (rand() % static_cast<int>(30 - 0 + 1));
+      y = y * 20 + 10;
       Coin coin;
       coin.setX(x);
       coin.setY(y);
@@ -433,6 +448,7 @@ void coinGeneration(int value) {
          break;
       }
    }
+   glutTimerFunc(5000, coinGeneration, 2);
 }
 
 void coinDrawing(int value) {
@@ -574,9 +590,16 @@ void myDisplay(void)
 
    if (isCrashed()) {
       printf("SOME CRASH! \n");
+   } else if (isCollectedCoin()){
+      printf("Earned coin! \n");
+      totalScore += 5;
+   } else {
+      //printf("Passed line! \n");
    }
-   coinDrawing(0);
 
+   coinDrawing(0);
+   bitMapString();
+   //printf("TOTAL SCORE : %d \r", totalScore);
    glFlush();
 }
 
@@ -662,6 +685,45 @@ bool isCrashed() {
    return false;
 }
 
+/*
+GLboolean CheckCollision(Car one)
+{
+    //UP
+    if (two.direction == true){
+        if ((one.posX == two.posX && one.posY == user->posY) || (one.posX == (two.posX - 1) && one.posY == two.posY)
+            || (one.posX == two.posX && one.posY == (two.posY + 1)) || (one.posX == (two.posX-1) && one.posY == (two.posY+1)))
+            return true;
+    }
+    //DOWN
+    else{
+        if ((one.posX == two.posX && one.posY == two.posY) || (one.posX == (two.posX - 1) && one.posY == two.posY)
+            || (one.posX == two.posX && one.posY == (two.posY - 1)) || (one.posX == (two.posX-1) && one.posY == (two.posY-1)))
+            return true;
+    }
+    
+    return false;
+}
+*/
+
+void coinDestruction(int val) {
+   coins->clear();
+   glutTimerFunc(10000, coinDestruction, 3);
+}
+
+void bitMapString() {
+   glColor3f(0.1233123f, 0.23423f, 0.35634534f);
+   char string[1024] = "Score :  ";
+   char buffer[1024];
+   sprintf(buffer, "%d", totalScore);
+   strcat(string, buffer);
+   int i=0;
+   glRasterPos2f(10, 590);
+   while (string[i] != '\0') {
+      glutBitmapCharacter( GLUT_BITMAP_8_BY_13, string[i]); ++i;
+   } 
+   glFlush();
+}
+
 
 int main(int argc, char** argv) {
 
@@ -672,7 +734,7 @@ int main(int argc, char** argv) {
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
    glutInitWindowSize(ww, wh);
-   glutInitWindowPosition(0,0 );
+   glutInitWindowPosition(0,0);
    glutCreateWindow("CrossLane");
    myinit();
    glutMouseFunc(myMouse);
@@ -682,5 +744,6 @@ int main(int argc, char** argv) {
    glutTimerFunc(500, generateVehicles, 0);
    glutTimerFunc(500, passingVehicles, 2);
    glutTimerFunc(500, coinGeneration, 1);
+   glutTimerFunc(10000, coinDestruction, 3);
    glutMainLoop();
 }

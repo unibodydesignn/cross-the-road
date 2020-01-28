@@ -4,8 +4,8 @@ CFLAGS=-g -I/Users/unibodydesignn/Desktop/include
 OBJFILES = *.o
 TARGET = crossroad
 
-crossroad: crossroad.o 
-	$(CC) $@.o $(LDFLAGS) -o $@
+crossroad: crossroad.o user.o
+	$(CC) $@.o user.o $(LDFLAGS) -o $@
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@ -w
