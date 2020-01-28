@@ -1,14 +1,15 @@
 #include "user.h"
 #include <iostream>
+#include <GLUT/glut.h>
+
 using namespace std;
 
 User::User() {
     xCo = 250;
-    yCo = 0;
+    yCo = 10;
     direction = true;
 }
 
-// $(CC) $(CFLAGS) -c $< -o $@ -w 
 User::~User() {
     xCo = 250;
     yCo = 0;
@@ -41,4 +42,21 @@ bool User::getDirection() {
 
 void User::setDirection(bool d) {
     direction = d;
+}
+
+void User::drawUser() {
+    glColor3f(0.123f, 0.12, 1.0f);
+    if (getDirection() == true) {
+      glBegin(GL_TRIANGLES);
+         glVertex2f(getX() -15, getY() -10);
+         glVertex2f(getX() +15, getY() -10);
+         glVertex2f(getX(), getY() + 10);
+      glEnd();
+   } else {
+      glBegin(GL_TRIANGLES);
+         glVertex2f(getX() -15, getY() + 10);
+         glVertex2f(getX() +15, getY() + 10);
+         glVertex2f(getX(), getY() - 10);
+      glEnd();
+   }
 }

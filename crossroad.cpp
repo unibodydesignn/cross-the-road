@@ -11,23 +11,27 @@
 #include <math.h>
 #include <thread>
 #include <unistd.h>
-#include <random>
 #include <algorithm>
 #include <vector>
 #include <string>
 //#include "truck.h"
 //#include "car.h"
-#include "user.h"
+//#include "user.h"
+//#include "random.h"
+//#include "coin.h"
+#include "gameelements.h"
+#include "lane.h"
+
 #pragma once
 
 #define PI 3.1415926535897932384626433832795
 #define RADIUS 10
-using namespace std;
-bool paused = false;
 
-bool isCrashed();
+using namespace std;
+
 void bitMapString();
 
+/*
 float random_float(float min, float max) {
    float y = ((float)rand() / RAND_MAX) * (max - min) + min;
 	return y;
@@ -36,7 +40,7 @@ float random_float(float min, float max) {
 int random_integer(int min, int max) {
    return min + (rand() % static_cast<int>(max - min + 1));
 }
-
+*/
 /*
 struct User {
 
@@ -86,6 +90,8 @@ struct User {
    }
 };
 */
+
+/*
 typedef struct Truck {
    private:
 
@@ -166,7 +172,8 @@ public:
        return tID;
     }
 };
-
+*/
+/*
 struct Car {
    private:
 
@@ -246,7 +253,8 @@ public:
        return cID;
     }
 };
-
+*/
+/*
 struct Coin {
 
 private:
@@ -269,19 +277,13 @@ public:
       return yCo;
    }
 };
+*/
 
-GLsizei wh = 600, ww = 500; /* initial window size */
-GLfloat size = 3.0;   /* half side length of square */
-unordered_map<uint32_t, Truck> *trucks;
-unordered_map<uint32_t, Car> *cars;
-vector<Coin> *coins;
-float deltaVelocity = 10.2;
+/*
+GLsizei wh = 600, ww = 500; 
 User *user;
 int totalScore = 0;
-uint32_t UID = 0;
 
-/* rehaping routine called whenever window is resized
-or moved */
 
 void myReshape(GLsizei w, GLsizei h)
 {
@@ -365,8 +367,10 @@ void myMouse(int btn, int state, int x, int y)
 {
    if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
       exit(0); /*terminate the program through OpenGL */
-}
+//}
 
+
+/*
 bool checkCarCollision(Car &otherCar) {
    bool collisionXLeft = false;
    bool collisionXRight = false;
@@ -387,6 +391,7 @@ bool checkCarCollision(Car &otherCar) {
 
 bool checkTruckCollision(Truck &otherTruck) {
 
+   
    bool collisionXLeft = false;
    bool collisionXRight = false;
    bool collisionY = false;
@@ -463,7 +468,9 @@ void coinDrawing(int value) {
    glutPostRedisplay();
    glFlush();
 }
+*/
 
+/*
 void keyInput(unsigned char key, int x, int y)
 {
    switch (key) 
@@ -475,8 +482,9 @@ void keyInput(unsigned char key, int x, int y)
          break;
    }
 }
+*/
 
-
+/*
 void myDisplay(void)
 {   
    glClear(GL_COLOR_BUFFER_BIT);
@@ -602,17 +610,18 @@ void myDisplay(void)
    //printf("TOTAL SCORE : %d \r", totalScore);
    glFlush();
 }
+*/
 
-
+/*
 void generateVehicles(int value) { 
-   int yLine = random_integer(1, 29);
+   int yLine = randomGenerator->random_integer(1, 29);
    
    if (yLine == 0 || yLine == 5 || yLine == 9 || yLine == 14 || yLine == 20 || yLine == 25 || yLine == 30) { 
       //printf(".... %d \n", yLine);
    } else {
       yLine = yLine * 20 + 10;
       int choice = 1 + (rand() % static_cast<int>(2 - 1 + 1));
-      float velocity = random_float(0.5, 1);
+      float velocity = randomGenerator->random_float(0.5, 1);
       if (choice == 1) {
          Car car(18, 18);
          car.setX(0);
@@ -635,7 +644,9 @@ void generateVehicles(int value) {
    glutPostRedisplay();
    glutTimerFunc(500, generateVehicles, 0);
 }
+*/
 
+/*
 void passingVehicles(int value) {
 
    vector<uint32_t> *idList = new vector<uint32_t>(cars->size());
@@ -684,6 +695,7 @@ bool isCrashed() {
 
    return false;
 }
+*/
 
 /*
 GLboolean CheckCollision(Car one)
@@ -705,6 +717,7 @@ GLboolean CheckCollision(Car one)
 }
 */
 
+/*
 void coinDestruction(int val) {
    coins->clear();
    glutTimerFunc(10000, coinDestruction, 3);
@@ -723,27 +736,174 @@ void bitMapString() {
    } 
    glFlush();
 }
+*/
 
+User *user;
+GameElements *game;
+Lane *lanes;
+GLuint ww = 500, wh = 600;
+int totalScore = 0;
+bool isGameEnded = false;
+bool isGamePaused = false;
+
+void initializeLayout(void) {
+   glViewport(0, 0, ww, wh);
+
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(0.0, (GLdouble)ww, 0.0, (GLdouble)wh);
+
+   glClearColor(0.0, 0.0, 0.0, 0.0);
+}
+
+void displayLayout(void) {
+
+   glClear(GL_COLOR_BUFFER_BIT);
+
+   lanes->drawBigLanes();
+   lanes->drawSmallLanes();
+
+   game->drawTrucks();
+   game->drawCars();
+   game->drawCoins();
+   
+   user->drawUser();
+
+   bitMapString();
+
+   if (game->isCrashed(*user)) {
+      isGameEnded = true;
+   } else if (game->isCollectedCoin(*user)){
+      totalScore += 5;
+   } else { }
+
+   glFlush();
+}
+
+void bitMapString() {
+   glColor3f(0.0f, 0.0f, 0.0f);
+   char string[1024] = "Score :  ";
+   char buffer[1024];
+   sprintf(buffer, "%d", totalScore);
+   strcat(string, buffer);
+   int i=0;
+   glRasterPos2f(10, 590);
+   while (string[i] != '\0') {
+      glutBitmapCharacter( GLUT_BITMAP_TIMES_ROMAN_24, string[i]); ++i;
+   } 
+   glFlush();
+}
+
+void mouseInput(int btn, int state, int x, int y) {
+   if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+      exit(0); /*terminate the program through OpenGL */
+}
+
+void keyboardInput(unsigned char key, int x, int y)
+{
+   switch (key) 
+   {
+      case 27:
+         exit(0);
+         break;
+      default:
+         break;
+   }
+}
+
+void moveUser(int key, int x, int y) {
+   switch (key) {
+      case GLUT_KEY_UP:
+         if (user->getY() >= 580) {
+            user->setY(600);
+         } else {
+            user->setY(user->getY() + 20);
+         }
+
+         user->setDirection(true);
+         if(!game->isCrashed(*user)) 
+            ++totalScore;
+
+         glutPostRedisplay();
+         break;
+      case GLUT_KEY_DOWN:
+         
+         if (user->getY() <= 20) {
+            user->setY(0);
+         } else {
+            user->setY(user->getY() - 20);
+         }
+         user->setDirection(false);
+
+         if(!game->isCrashed(*user)) 
+            ++totalScore;
+
+         glutPostRedisplay();
+         break;
+      case GLUT_KEY_LEFT:
+         if (user->getX() <= 10) {
+            user->setX(0);
+         } else {
+            user->setX(user->getX() - 10);
+         }
+         glutPostRedisplay();
+         break;
+      case GLUT_KEY_RIGHT:
+         if (user->getX() >= 490) {
+            user->setX(500);
+         } else {
+            user->setX(user->getX() + 10);
+         }
+         glutPostRedisplay();
+         break;
+      default:
+         exit(0);
+   }
+}
+
+void initializeVehicles(int val) {
+   game->generateVehicles();
+   glutPostRedisplay();
+   glutTimerFunc(500, initializeVehicles, 0);
+}
+
+void updateVehicles(int val) {
+   game->passingVehicles();
+   glutPostRedisplay();
+   glutTimerFunc(100, updateVehicles, 2);
+}
+
+void initializeCoins(int val) {
+   game->coinGeneration();
+   glutPostRedisplay();
+   glutTimerFunc(5000, initializeCoins, 1);
+}
+
+void destructCoins(int val) {
+   game->coinDestruction();
+   glutPostRedisplay();
+   glutTimerFunc(10000, destructCoins, 3);
+}
 
 int main(int argc, char** argv) {
 
    user = new User();
-   trucks = new unordered_map<uint32_t, Truck>(10);
-   cars = new unordered_map<uint32_t, Car>(10);
-   coins = new vector<Coin>(10);
+   game = new GameElements();
+   lanes = new Lane();
+
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
    glutInitWindowSize(ww, wh);
    glutInitWindowPosition(0,0);
    glutCreateWindow("CrossLane");
-   myinit();
-   glutMouseFunc(myMouse);
-   glutDisplayFunc(myDisplay);
-   glutKeyboardFunc(keyInput);
+   initializeLayout();
+   glutMouseFunc(mouseInput);
+   glutDisplayFunc(displayLayout);
+   glutKeyboardFunc(keyboardInput);
    glutSpecialFunc(moveUser);
-   glutTimerFunc(500, generateVehicles, 0);
-   glutTimerFunc(500, passingVehicles, 2);
-   glutTimerFunc(500, coinGeneration, 1);
-   glutTimerFunc(10000, coinDestruction, 3);
+   glutTimerFunc(500, initializeVehicles, 0);
+   glutTimerFunc(500, updateVehicles, 2);
+   glutTimerFunc(500, initializeCoins, 1);
+   glutTimerFunc(10000, destructCoins, 3);
    glutMainLoop();
 }

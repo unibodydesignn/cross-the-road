@@ -4,6 +4,8 @@
 class Car {
 private:
 
+    uint32_t cID;
+
     float wid;
     float hgt;
 
@@ -13,43 +15,20 @@ private:
     bool direction; // true = right --- false = left
 
 public:
-    Car(float w, float h) {
-        wid = w;
-        hgt = h;
-    }
 
-    Car(const Car &otherCar) {
-        xCo = otherCar.xCo;
-        yCo = otherCar.yCo;
-    }
+    Car();
+    Car(float w, float h);
+    Car(const Car &otherCar);
+    ~Car();
 
-    ~Car() {
-        xCo = 0;
-        yCo = 0;
-    }
-
-    void setCoordinate(float x, float y) {
-        xCo = x;
-        yCo = y;
-    }
-
-    void setVelocity(float vel) {
-        v = vel;
-    } 
-
-    void setDirection(bool d) {
-        direction = d;
-    }
-
-    void setX(float x) {
-        xCo = x;
-    }
-
-    float getX() {
-        return xCo;
-    }
-
-    float getVelocity() {
-        return v;
-    }
+    void setCoordinate(float x, float y);
+    void setVelocity(float vel);
+    void setDirection(bool d);
+    void setX(float x);
+    float getX();
+    float getVelocity();
+    void setY(float y);
+    float getY();
+    void setID(uint32_t id);
+    uint32_t getID();
 };

@@ -5,6 +5,8 @@ class Truck {
 
 private:
 
+    uint32_t tID;
+
     float wid;
     float hgt;
 
@@ -14,43 +16,19 @@ private:
     bool direction; // true = right --- false = left
 
 public:
-    Truck(float w, float h) {
-        wid = w;
-        hgt = h;
-    }
+    Truck();
+    Truck(float w, float h);
+    Truck(const Truck &otherTruck);
+    ~Truck();
 
-    Truck(const Truck &otherTruck) {
-        xCo = otherTruck.xCo;
-        yCo = otherTruck.yCo;
-    }
-
-    ~Truck() {
-        xCo = 0;
-        yCo = 0;
-    }
-
-    void setCoordinate(float x, float y) {
-        xCo = x;
-        yCo = y;
-    }
-
-    void setVelocity(float vel) {
-        v = vel;
-    } 
-
-    void setDirection(bool d) {
-        direction = d;
-    }
-
-    void setX(float x) {
-        xCo = x;
-    }
-
-    float getX() {
-        return xCo;
-    }
-
-    float getVelocity() {
-        return v;
-    }
+    void setCoordinate(float x, float y);
+    void setVelocity(float vel);
+    void setDirection(bool d);
+    void setX(float x);
+    float getX();
+    void setY(float y);
+    float getY();
+    float getVelocity();
+    void setID(uint32_t id);
+    uint32_t getID();
 };

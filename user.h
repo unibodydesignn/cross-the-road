@@ -26,4 +26,6 @@ public:
     bool getDirection();
 
     void setDirection(bool d);
+
+    void drawUser();
 };
