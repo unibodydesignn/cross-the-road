@@ -815,12 +815,13 @@ void moveUser(int key, int x, int y) {
    switch (key) {
       case GLUT_KEY_UP:
          if (user->getY() >= 580) {
-            user->setY(600);
+            user->setY(590);
+            user->setDirection(false);
          } else {
             user->setY(user->getY() + 20);
+            user->setDirection(true);
          }
 
-         user->setDirection(true);
          if(!game->isCrashed(*user)) 
             ++totalScore;
 
@@ -829,11 +830,12 @@ void moveUser(int key, int x, int y) {
       case GLUT_KEY_DOWN:
          
          if (user->getY() <= 20) {
-            user->setY(0);
+            user->setY(10);
+            user->setDirection(true);
          } else {
             user->setY(user->getY() - 20);
+            user->setDirection(false);
          }
-         user->setDirection(false);
 
          if(!game->isCrashed(*user)) 
             ++totalScore;
