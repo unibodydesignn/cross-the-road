@@ -12,6 +12,7 @@ private:
 
     float xCo;
     float yCo;
+    
     float v;
     bool direction; // true = right --- false = left
 
