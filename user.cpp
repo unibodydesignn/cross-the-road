@@ -60,3 +60,39 @@ void User::drawUser() {
       glEnd();
    }
 }
+
+void User::goUp() {
+    if (getY() >= 580) {
+        setY(590);
+        setDirection(false);
+    } else {
+        setY(getY() + 20);
+        setDirection(true);
+    }
+}
+
+void User::goDown() {
+    if (getY() <= 20) {
+        setY(10);
+        setDirection(true);
+    } else {
+        setY(getY() - 20);
+        setDirection(false);
+    }
+}
+
+void User::turnLeft() {
+    if (getX() <= 10) {
+        setX(0);
+    } else {
+        setX(getX() - 10);
+    }
+}
+
+void User::turnRight() {
+    if (getX() >= 490) {
+        setX(500);
+    } else {
+        setX(getX() + 10);
+    }
+}

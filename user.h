@@ -28,4 +28,12 @@ public:
     void setDirection(bool d);
 
     void drawUser();
+
+    void goUp();
+
+    void goDown();
+
+    void turnLeft();
+
+    void turnRight();
 };
