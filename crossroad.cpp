@@ -15,19 +15,66 @@ GLuint ww = 500, wh = 600;
 int totalScore = 0;
 bool isGameEnded = false;
 bool isGamePaused = false;
+bool gameStatus = false;
 
 void bitMapString() {
-   glColor3f(0.0f, 0.0f, 0.0f);
-   char string[1024] = "Score :  ";
-   char buffer[1024];
-   sprintf(buffer, "%d", totalScore);
-   strcat(string, buffer);
-   int i=0;
-   glRasterPos2f(10, 590);
-   while (string[i] != '\0') {
-      glutBitmapCharacter( GLUT_BITMAP_TIMES_ROMAN_24, string[i]); ++i;
-   } 
-   glFlush();
+   if (isGamePaused == true) {
+      glColor3f(0.0f, 0.0f, 0.0f);
+      char string[1024] = "GAME PAUSED!";
+      int i=0;
+      glRasterPos2f(10, 590);
+      while (string[i] != '\0') {
+         glutBitmapCharacter( GLUT_BITMAP_TIMES_ROMAN_24, string[i]); ++i;
+      } 
+      glFlush();
+   } else if (isGameEnded == true) {
+      glColor3f(0.0f, 0.0f, 0.0f);
+      char string[1024] = "Game Over! Your Score :  ";
+      char buffer[1024];
+      sprintf(buffer, "%d", totalScore);
+      strcat(string, buffer);
+      int i=0;
+      glRasterPos2f(10, 590);
+      while (string[i] != '\0') {
+         glutBitmapCharacter( GLUT_BITMAP_TIMES_ROMAN_24, string[i]); ++i;
+      } 
+      glFlush();
+   } else {
+      glColor3f(0.0f, 0.0f, 0.0f);
+      char string[1024] = "Score :  ";
+      char buffer[1024];
+      sprintf(buffer, "%d", totalScore);
+      strcat(string, buffer);
+      int i=0;
+      glRasterPos2f(10, 590);
+      while (string[i] != '\0') {
+         glutBitmapCharacter( GLUT_BITMAP_TIMES_ROMAN_24, string[i]); ++i;
+      } 
+      glFlush();
+   }
+   
+}
+
+void gameState(int choice) {
+
+   if (choice == 1 ) {             // Try again
+      glClear(GL_COLOR_BUFFER_BIT);
+   } else if (choice == 2) {      // exit game!
+      exit(0);
+   } else {
+      printf("Something is not right! \n");
+   }
+}
+
+void popupMenu() {
+   glutCreateMenu(gameState);
+	glutAddMenuEntry("Try Again!", 1);
+   glutAddMenuEntry("Exit!", 2);
+   glutPostRedisplay();
+}
+
+void removeMenu(int menuID) {
+   glutDestroyMenu(menuID);
 }
 
 void initializeLayout(void) {
@@ -42,31 +89,38 @@ void initializeLayout(void) {
 
 void displayLayout(void) {
 
-   glClear(GL_COLOR_BUFFER_BIT);
+   if (isGamePaused == true && isGameEnded == true ) {
+      printf("Game paused or ended!\n");
+   } else {
+      glClear(GL_COLOR_BUFFER_BIT);
 
-   lanes->drawBigLanes();
-   lanes->drawSmallLanes();
+      lanes->drawBigLanes();
+      lanes->drawSmallLanes();
 
-   game->drawTrucks();
-   game->drawCars();
-   game->drawCoins();
+      game->drawTrucks();
+      game->drawCars();
+      game->drawCoins();
+      
+      user->drawUser();
+
+      bitMapString();
+
+      if (game->isCrashed(*user)) {
+         isGameEnded = true;
+      } else if (game->isCollectedCoin(*user)){
+         popupMenu();
+         totalScore += 5;
+      } else { }
+   }
    
-   user->drawUser();
-
-   bitMapString();
-
-   if (game->isCrashed(*user)) {
-      isGameEnded = true;
-   } else if (game->isCollectedCoin(*user)){
-      totalScore += 5;
-   } else { }
-
    glFlush();
 }
 
 void mouseInput(int btn, int state, int x, int y) {
-   if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+   if (btn == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
       exit(0); /*terminate the program through OpenGL */
+   else if (btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+      isGamePaused = !isGamePaused;
 }
 
 void keyboardInput(unsigned char key, int x, int y)
@@ -82,56 +136,88 @@ void keyboardInput(unsigned char key, int x, int y)
 }
 
 void moveUser(int key, int x, int y) {
-   switch (key) {
-      case GLUT_KEY_UP:
-         user->goUp();
+   if (isGameEnded == true || isGamePaused == true) { 
+      printf("Game paused! \n");
+   } else {
+      switch (key) {
+         case GLUT_KEY_UP:
+            user->goUp();
 
-         if(!game->isCrashed(*user)) 
-            ++totalScore;
+            if(!game->isCrashed(*user)) 
+               ++totalScore;
+            else
+               isGameEnded = true;
 
-         glutPostRedisplay();
-         break;
-      case GLUT_KEY_DOWN:
-         user->goDown();
+            glutPostRedisplay();
+            break;
+         case GLUT_KEY_DOWN:
+            user->goDown();
 
-         if(!game->isCrashed(*user)) 
-            ++totalScore;
+            if(!game->isCrashed(*user)) 
+               ++totalScore;
+            else
+               isGameEnded = true;
 
-         glutPostRedisplay();
-         break;
-      case GLUT_KEY_LEFT:
-         user->turnLeft();
-         glutPostRedisplay();
-         break;
-      case GLUT_KEY_RIGHT:
-         user->turnRight();
-         glutPostRedisplay();
-         break;
-      default:
-         printf("Wrong button! \n");
+            glutPostRedisplay();
+            break;
+         case GLUT_KEY_LEFT:
+            user->turnLeft();
+
+            if(game->isCrashed(*user))
+               isGameEnded =true;
+
+            glutPostRedisplay();
+            break;
+         case GLUT_KEY_RIGHT:
+            user->turnRight();
+
+            if(game->isCrashed(*user))
+               isGameEnded = true;
+               
+            glutPostRedisplay();
+            break;
+         default:
+            printf("Wrong button! \n");
+      }
    }
 }
 
 void initializeVehicles(int val) {
-   game->generateVehicles();
+   if (isGameEnded == true || isGamePaused == true) {
+      printf("Game paused!\n");
+   } else {
+      game->generateVehicles();
+   }
    glutPostRedisplay();
    glutTimerFunc(500, initializeVehicles, 0);
 }
 
 void updateVehicles(int val) {
-   game->passingVehicles();
+   if (isGameEnded == true || isGamePaused == true) {
+      printf("Game paused!\n");
+   } else {
+      game->passingVehicles();
+   }
    glutPostRedisplay();
    glutTimerFunc(100, updateVehicles, 2);
 }
 
 void initializeCoins(int val) {
-   game->coinGeneration();
+   if (isGameEnded == true || isGamePaused == true) {
+      printf("Game paused!\n");
+   } else {
+      game->coinGeneration();
+   }
    glutPostRedisplay();
    glutTimerFunc(5000, initializeCoins, 1);
 }
 
 void destructCoins(int val) {
-   game->coinDestruction();
+   if (isGameEnded == true || isGamePaused == true) {
+      printf("Game paused!\n");
+   } else {
+      game->coinDestruction();
+   }
    glutPostRedisplay();
    glutTimerFunc(10000, destructCoins, 3);
 }

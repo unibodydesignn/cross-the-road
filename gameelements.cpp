@@ -157,7 +157,6 @@ bool GameElements::checkCarCollision(Car &otherCar, User &user) {
     collisionY = user.getY() >= otherCar.getY() && otherCar.getY() >= user.getY();
 
     return (collisionXLeft || collisionXRight) && collisionY;
-
 }
 
 bool GameElements::checkCoinCollision(Coin &coin, User &user) {
