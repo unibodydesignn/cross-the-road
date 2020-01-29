@@ -1,14 +1,27 @@
 #include "lane.h"
 #include <stdio.h>
 
+
+/**
+ * Constructor of Lane class
+ */
 Lane::Lane() {
     printf("Constructed Lane!\n");
 }
 
+/**
+ * Destructor of Lane class
+ */
 Lane::~Lane() {
     printf("Destructed Lane! \n");
 }
 
+/**
+ * @param none 
+ * @return void
+ * 
+ * This method draws walking road to screen with given coordinates
+ **/
 void Lane::drawBigLanes() {
     glColor3f(1.0, 1.0, 1.0f);
 
@@ -64,6 +77,14 @@ void Lane::drawBigLanes() {
    glEnd();
 }
 
+/**
+ * @param none
+ * @return void
+ * 
+ * Draws small lanes in the layout.
+ * Trucks, cars and coins will be generated in these lanes.
+ * 
+ * */
 void Lane::drawSmallLanes() {
     // Draws the road lane one by one
    glColor3f(1.0f, 1.0f, 1.0f);

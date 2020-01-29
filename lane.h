@@ -7,5 +7,4 @@ public:
     ~Lane();
     void drawBigLanes();
     void drawSmallLanes();
-
 };
