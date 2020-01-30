@@ -82,6 +82,17 @@ void Truck::setDirection(bool d) {
 }
 
 /**
+ * @param none
+ * @return bool direction
+ * 
+ * Returns direction of truck 
+ * 
+ * */
+bool Truck::getDirection() {
+    return direction;
+}
+
+/**
  * @param float x
  * @return void
  * 

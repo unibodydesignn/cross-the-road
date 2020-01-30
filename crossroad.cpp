@@ -271,7 +271,7 @@ void initializeVehicles(int val) {
       game->generateVehicles();
    }
    glutPostRedisplay();
-   glutTimerFunc(500, initializeVehicles, 0);
+   glutTimerFunc(300, initializeVehicles, 0);
 }
 
 /**
@@ -283,12 +283,12 @@ void initializeVehicles(int val) {
  * */
 void updateVehicles(int val) {
    if (isGameEnded == true || isGamePaused == true) {
-      printf("Game paused!\n");
+      //printf("Game paused!\n");
    } else {
       game->passingVehicles();
    }
    glutPostRedisplay();
-   glutTimerFunc(100, updateVehicles, 2);
+   glutTimerFunc(50, updateVehicles, 2);
 }
 
 /**
@@ -301,7 +301,7 @@ void updateVehicles(int val) {
  * */
 void initializeCoins(int val) {
    if (isGameEnded == true || isGamePaused == true) {
-      printf("Game paused!\n");
+      //printf("Game paused!\n");
    } else {
       game->coinGeneration();
    }
@@ -319,13 +319,14 @@ void initializeCoins(int val) {
  * */
 void destructCoins(int val) {
    if (isGameEnded == true || isGamePaused == true) {
-      printf("Game paused!\n");
+      //printf("Game paused!\n");
    } else {
       game->coinDestruction();
    }
    glutPostRedisplay();
    glutTimerFunc(10000, destructCoins, 3);
 }
+
 
 /**
  * 
@@ -348,8 +349,8 @@ int main(int argc, char** argv) {
    glutDisplayFunc(displayLayout);
    glutKeyboardFunc(keyboardInput);
    glutSpecialFunc(moveUser);
-   glutTimerFunc(500, initializeVehicles, 0);
-   glutTimerFunc(500, updateVehicles, 2);
+   glutTimerFunc(300, initializeVehicles, 0);
+   glutTimerFunc(300, updateVehicles, 2);
    glutTimerFunc(500, initializeCoins, 1);
    glutTimerFunc(10000, destructCoins, 3);
    glutMainLoop();

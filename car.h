@@ -24,6 +24,7 @@ public:
     void setCoordinate(float x, float y);
     void setVelocity(float vel);
     void setDirection(bool d);
+    bool getDirection();
     void setX(float x);
     float getX();
     float getVelocity();

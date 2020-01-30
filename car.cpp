@@ -81,6 +81,16 @@ void Car::setDirection(bool d) {
     direction = d;
 }
 
+/**
+ * @param none
+ * @return bool direction
+ * 
+ * Returns direction of car 
+ * 
+ * */
+bool Car::getDirection() {
+    return direction;
+}
 
 /**
  * @param float x

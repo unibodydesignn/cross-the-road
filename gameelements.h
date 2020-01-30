@@ -48,4 +48,6 @@ public:
     bool checkCoinCollision(Coin &coin, User &user);
     bool isCollectedCoin(User &user);
 
+    bool isInRange(float num, float min, float max);
+
 };

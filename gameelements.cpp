@@ -38,22 +38,38 @@ GameElements::~GameElements() {
 void GameElements::generateVehicles() {
 
     int yLine = randomGenerator->random_integer(1, 29);   
-    if (yLine == 0 || yLine == 5 || yLine == 9 || yLine == 14 || yLine == 20 || yLine == 25 || yLine == 30) { 
+    if (yLine == 0 || yLine == 5 || yLine == 9 || yLine == 14 || yLine == 20 || yLine == 25 || yLine == 29) { 
         //printf(".... %d \n", yLine);
     } else {
         yLine = yLine * 20 + 10;
         int choice = 1 + (rand() % static_cast<int>(2 - 1 + 1));
-        float velocity = randomGenerator->random_float(0.5, 1);
+        int dir = 1 + (rand() % static_cast<int>(2 - 1 + 1));
+        //float velocity = randomGenerator->random_float(0.5, 1);
+        float velocity = 5.75;
         if (choice == 1) {
-            Car car(18, 18);
-            car.setX(0);
+            Car car(20, 20);
+            if (dir == 1) {
+                car.setDirection(true);
+                car.setX(0);
+            }
+            else {
+                car.setDirection(false);
+                car.setX(500);
+            } 
             car.setY(yLine);
             car.setVelocity(velocity);
             car.setID(++UID);
             cars->insert(make_pair(car.getID(), car));
         } else if (choice == 2) {
-            Truck truck(18, 36);
-            truck.setX(0);
+            Truck truck(20, 40);
+            if (dir == 1) {
+                truck.setDirection(true);
+                truck.setX(0);
+            }
+            else {
+                truck.setDirection(false);
+                truck.setX(500);
+            }
             truck.setY(yLine);
             truck.setVelocity(velocity);
             truck.setID(++UID);
@@ -79,7 +95,7 @@ void GameElements::coinGeneration() {
     glColor3f(1.0f, 1.0f, 0.0f);
     for(int c = 0; c < 10; c++) {
         int x = 10 + (rand() % static_cast<int>(500 - 10 + 1));
-      int y = 10 + (rand() % static_cast<int>(30 - 0 + 1));
+      int y = randomGenerator->random_integer(1, 29);
       y = y * 20 + 10;
       Coin coin;
       coin.setX(x);
@@ -180,11 +196,16 @@ void GameElements::passingVehicles() {
     vector<uint32_t> *idList = new vector<uint32_t>(cars->size());
 
     for(auto it = cars->begin(); it != cars->end(); it++) {
-        float temp2 = it->second.getVelocity();
-        float temp = (temp2 *10) + it->second.getX();
-        it->second.setX(temp);
-        if (it->second.getX() >= 500) {
-            idList->push_back(it->first);
+        if(it->second.getDirection() == true) {
+            it->second.setX(it->second.getX() + it->second.getVelocity() * 5);
+            if (it->second.getX() >= 500) {
+                idList->push_back(it->first);
+            }
+        } else {
+            it->second.setX(it->second.getX() - it->second.getVelocity() * 5);
+            if (it->second.getX() <= 0) {
+                idList->push_back(it->first);
+            }
         }
     }
 
@@ -193,9 +214,16 @@ void GameElements::passingVehicles() {
     }
 
     for(auto it = trucks->begin(); it != trucks->end(); it++) {
-        it->second.setX(it->second.getX() + it->second.getVelocity() * 10);
-        if (it->second.getX() >= 500) {
-            idList->push_back(it->first);
+        if(it->second.getDirection() == true) {
+            it->second.setX(it->second.getX() + it->second.getVelocity() * 5);
+            if (it->second.getX() >= 500) {
+                idList->push_back(it->first);
+            }
+        } else {
+            it->second.setX(it->second.getX() - it->second.getVelocity() * 5);
+            if (it->second.getX() <= 0) {
+                idList->push_back(it->first);
+            }
         }
     }
 
@@ -216,15 +244,23 @@ void GameElements::passingVehicles() {
  * 
  * */
 bool GameElements::checkTruckCollision(Truck &otherTruck, User &user) {
-    bool collisionXLeft = false;
-    bool collisionXRight = false;
     bool collisionY = false;
 
-    collisionXLeft = user.getX() + 10 >= otherTruck.getX() -10 && user.getX() -10 <= otherTruck.getX() -10;
-    collisionXRight = user.getX() -10 <= otherTruck.getX() + 10 && user.getX() - 10 >= otherTruck.getX() + 10;
+    float userX = user.getX();
+    float userY = user.getY();
+
+    float userXMinusTen = user.getX() - 10;
+    float userXPlusTen = user.getX() + 10;
+
+    float truckXMinusThirty = otherTruck.getX() - 30;
+    float truckXPlusThirty = otherTruck.getX() + 30;
+
     collisionY = user.getY() >= otherTruck.getY() && otherTruck.getY() >= user.getY();
 
-    return (collisionXLeft || collisionXRight) && collisionY;
+    if(isInRange(userX, truckXMinusThirty, truckXPlusThirty) && collisionY)
+        return true;
+    else 
+        return false;
 }
 
 /**
@@ -237,15 +273,23 @@ bool GameElements::checkTruckCollision(Truck &otherTruck, User &user) {
  * 
  * */
 bool GameElements::checkCarCollision(Car &otherCar, User &user) {
-    bool collisionXLeft = false;
-    bool collisionXRight = false;
     bool collisionY = false;
 
-    collisionXLeft = user.getX() + 10 >= otherCar.getX() -10 && user.getX() -10 <= otherCar.getX() -10;
-    collisionXRight = user.getX() -10 <= otherCar.getX() + 10 && user.getX() - 10 >= otherCar.getX() + 10;
+    float userX = user.getX();
+    float userY = user.getY();
+
+    float userXMinusTen = user.getX() - 10;
+    float userXPlusTen = user.getX() + 10;
+
+    float carXMinusTwenty = otherCar.getX() - 20;
+    float carXPlusTwenty = otherCar.getX() + 20;
+
     collisionY = user.getY() >= otherCar.getY() && otherCar.getY() >= user.getY();
 
-    return (collisionXLeft || collisionXRight) && collisionY;
+    if(isInRange(userX, carXMinusTwenty, carXPlusTwenty) && collisionY)
+        return true;
+    else 
+        return false;
 }
 
 /**
@@ -287,10 +331,9 @@ bool GameElements::isCrashed(User &user) {
 
    for(auto it = cars->begin(); it != cars->end(); it++) { 
       if (checkCarCollision(it->second, user)) 
-         return true;
-   }
-
-   return false;
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -311,4 +354,18 @@ bool GameElements::isCollectedCoin(User &user) {
         }
    }
    return collected;
+}
+
+
+/**
+ * @param float num, float min, float max
+ * @return true or false
+ * 
+ * Checks if given number num is range between min and max
+ * */
+bool GameElements::isInRange(float num, float min, float max) {
+    if (num <= max && num >= min) 
+        return true;
+    else 
+        return false;
 }

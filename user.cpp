@@ -112,14 +112,14 @@ void User::drawUser() {
     glColor3f(0.123f, 0.12, 1.0f);
     if (getDirection() == true) {
       glBegin(GL_TRIANGLES);
-         glVertex2f(getX() -15, getY() -10);
-         glVertex2f(getX() +15, getY() -10);
+         glVertex2f(getX() -10, getY() -10);
+         glVertex2f(getX() +10, getY() -10);
          glVertex2f(getX(), getY() + 10);
       glEnd();
    } else {
       glBegin(GL_TRIANGLES);
-         glVertex2f(getX() -15, getY() + 10);
-         glVertex2f(getX() +15, getY() + 10);
+         glVertex2f(getX() -10, getY() + 10);
+         glVertex2f(getX() +10, getY() + 10);
          glVertex2f(getX(), getY() - 10);
       glEnd();
    }
@@ -138,8 +138,9 @@ void User::goUp() {
         setY(590);
         setDirection(false);
     } else {
-        setY(getY() + 20);
-        setDirection(true);
+        if(getDirection() == true) {
+            setY(getY() + 20);
+        }
     }
 }
 
@@ -156,8 +157,9 @@ void User::goDown() {
         setY(10);
         setDirection(true);
     } else {
-        setY(getY() - 20);
-        setDirection(false);
+        if (getDirection() == false) {
+            setY(getY() - 20);
+        }
     }
 }
 
