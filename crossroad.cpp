@@ -332,6 +332,7 @@ void destructCoins(int val) {
  * 
  * This is where magic happens.
  * Magic of glutMainLoop.
+ * 
  * */
 int main(int argc, char** argv) {
 
