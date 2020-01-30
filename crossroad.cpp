@@ -271,7 +271,7 @@ void initializeVehicles(int val) {
       game->generateVehicles();
    }
    glutPostRedisplay();
-   glutTimerFunc(300, initializeVehicles, 0);
+   glutTimerFunc(150, initializeVehicles, 0);
 }
 
 /**
@@ -349,7 +349,7 @@ int main(int argc, char** argv) {
    glutDisplayFunc(displayLayout);
    glutKeyboardFunc(keyboardInput);
    glutSpecialFunc(moveUser);
-   glutTimerFunc(300, initializeVehicles, 0);
+   glutTimerFunc(200, initializeVehicles, 0);
    glutTimerFunc(300, updateVehicles, 2);
    glutTimerFunc(500, initializeCoins, 1);
    glutTimerFunc(10000, destructCoins, 3);

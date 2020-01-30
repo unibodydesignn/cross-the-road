@@ -45,7 +45,7 @@ void GameElements::generateVehicles() {
         int choice = 1 + (rand() % static_cast<int>(2 - 1 + 1));
         int dir = 1 + (rand() % static_cast<int>(2 - 1 + 1));
         //float velocity = randomGenerator->random_float(0.5, 1);
-        float velocity = 5.75;
+        float velocity = 7.25;
         if (choice == 1) {
             Car car(20, 20);
             if (dir == 1) {
